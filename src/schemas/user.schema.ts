@@ -3,9 +3,10 @@ import { validatePassword, validatePasswordCharacters } from '../helpers/passwor
 import { UserBodyInput } from '../insterfaces/user.interface'
 
 export const userBodySchema = z.object({
-  userName: z.string().min(5).max(50).trim().toLowerCase(),
+  userName: z.string().min(5).max(20).trim().toLowerCase(),
   email: z.string().email().toLowerCase().trim(),
   password: validatePasswordCharacters(),
+  role: z.string().min(4).max(20).trim().toLowerCase(),
 })
 .superRefine(({ userName, email, password }: UserBodyInput, ctx) => {
   validatePassword(password, userName, email).forEach((error) => {

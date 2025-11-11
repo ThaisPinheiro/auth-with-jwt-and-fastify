@@ -8,8 +8,8 @@ export function validatePasswordCharacters() {
 }
 
 export function validatePassword(password: string, userName: string, email: string): string[] {
-  const errors: string[] = [];
-  const lowerPwd = password.toLowerCase();
+  const errors: string[] = []
+  const lowerPwd = password.toLowerCase()
 
   if (lowerPwd.includes(userName) || (userName && lowerPwd.includes(userName.replace(/\s+/g, '')))) {
     errors.push('Senha não pode conter o nome de usuário')

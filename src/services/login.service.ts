@@ -2,9 +2,10 @@ import { User } from '../model/user.model'
 import bycript from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { AuthenticateInput } from '../insterfaces/auth.interface'
+import { userBodySchema } from '../schemas/user.schema'
 
 export class LoginService {
-  static async authenticateUser({ email, password }: AuthenticateInput) {
+  async authenticateUser({ email, password }: AuthenticateInput) {
     const user = await User.findOne({ email })
     if (!user) throw new Error('Invalid credentials')
 
@@ -13,12 +14,13 @@ export class LoginService {
     return user
   }
 
-  static async generateToken(id: string) {
+  async generateToken(user: { id?: string, role?: string }) {
+    if (!!user.id) throw new Error('User id is required to generate token')
+    const issuedAt = Math.floor(Date.now() / 1000)
     return jwt.sign(
-            { sub: id },
+            { sub: user.id, role: user.role, iat: issuedAt },
             process.env.JWT_SECRET!,
             { expiresIn: parseInt(process.env.JWT_EXPIRES || '1h') }
           )
   }
-
 }

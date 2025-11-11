@@ -1,20 +1,19 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { UserService } from '../services/user.service'
-import { userBodySchema } from '../schemas/user.schema'
+import { UserController } from '../controllers/user.controller'
 
-//TODO: Melhorar tratativas de erros
-//TODO: jogar userBodySchema.parse(request.body) em um middleware de validação
 export async function userRoutes(app: FastifyInstance) {
-  app.post('/register', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const userData = userBodySchema.parse(request.body)
-      const user = await UserService.registerUser(userData)
-      app.logger.info(`User created: { id: ${user.userId}, timestamp: ${new Date().toISOString()} }`)
-      return reply.status(201).send({ message: 'User registered successfully' })
-    } catch (error: any) {
-      app.logger.error(`User registration failed: ${error?.message ?? 'unknown error'}`)
-      return reply.status(400).send({ error: error.message })
-    }
-  })
+  const service = new UserService()
+  const controller = new UserController(service)
 
+  app.post('/register', controller.register)
+
+  app.get('/admin',
+    { preHandler: [app.verifyJWT, app.authorizeRole('admin')] },
+    async () => ({ message: 'Welcome, admin!'}))
+
+  app.get('/my-account', {preHandler: [app.verifyJWT]}, controller.getUserAccount)
+
+  app.get('/home', {preHandler: [app.verifyJWT]},
+    async () => ({ message: 'Welcome to the home page!' }))
 }
